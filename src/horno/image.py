@@ -12,12 +12,14 @@ import scipy.ndimage
 
 import matplotlib.pyplot as plt
 
-def sigma_clipped_stats(data, sigma=3.0, axis=None):
+import photutils.aperture
+
+def sigmaclippedstats(data, sigma=3.0, axis=None):
     """
     Return sigma-clipped statistics of the given data.
 
     This behaves exactly as:
-    
+
         astropy.stats.sigma_clipped_stats(
             data, sigma=sigma, axis=axis, cenfunc="median", stdfunc="mad_std"
         )
@@ -52,17 +54,17 @@ def sigma_clipped_stats(data, sigma=3.0, axis=None):
 
             for iy in range(ny):
                 meanrow, medianrow, sigmarow = astropy.stats.sigma_clipped_stats(
-                        data[:, iy, :],
-                        sigma=sigma,
-                        axis=0,
-                        cenfunc="median",
-                        stdfunc="mad_std",
-                    )
-                
+                    data[:, iy, :],
+                    sigma=sigma,
+                    axis=0,
+                    cenfunc="median",
+                    stdfunc="mad_std",
+                )
+
                 meanimage[iy, :] = meanrow
                 medianimage[iy, :] = medianrow
                 sigmaimage[iy, :] = sigmarow
-                                
+
             mean = meanimage
             median = medianimage
             sigma = sigmaimage
@@ -86,19 +88,19 @@ def sigma_clipped_stats(data, sigma=3.0, axis=None):
 def clippedmean(data, sigma=3.0, axis=None):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", Warning)
-        mean, median, sigma = sigma_clipped_stats(data, sigma=sigma, axis=axis)
+        mean, median, sigma = sigmaclippedstats(data, sigma=sigma, axis=axis)
     return mean
 
 
 def clippedsigma(data, sigma=3.0, axis=None):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", Warning)
-        mean, median, sigma = sigma_clipped_stats(data, sigma=sigma, axis=axis)
+        mean, median, sigma = sigmaclippedstats(data, sigma=sigma, axis=axis)
     return sigma
 
 
 def clippedmeanandsigma(data, sigma=3.0, axis=None):
-    mean, median, sigma = sigma_clipped_stats(data, sigma=sigma, axis=axis)
+    mean, median, sigma = sigmaclippedstats(data, sigma=sigma, axis=axis)
     return mean, sigma
 
 
@@ -129,21 +131,28 @@ def show(
     ny = data.shape[0]
     nx = data.shape[1]
     nmax = max(ny, nx)
-    
+
     if np.max(data.shape) > 1000:
         tickinterval = 100
     else:
         tickinterval = int(math.pow(2, int(math.log2(nmax / 16))))
-    ticks = list(np.linspace(-tickinterval * (nmax // 2 // tickinterval), +tickinterval * (nmax // 2 // tickinterval), 1 + 2 * (nmax // 2 // tickinterval)))
-
+    ticks = list(
+        np.linspace(
+            -tickinterval * (nmax // 2 // tickinterval),
+            +tickinterval * (nmax // 2 // tickinterval),
+            1 + 2 * (nmax // 2 // tickinterval),
+        )
+    )
 
     if small:
         plt.figure(figsize=(5, 5))
     else:
         plt.figure(figsize=(10, 10))
-    plt.imshow(data, origin="lower", norm=norm, extent=[-nx/2, +nx/2, -ny/2, +ny/2])
-    plt.xticks(ticks, rotation=90)
-    plt.yticks(ticks)
+    plt.imshow(
+        data, origin="lower", norm=norm,
+    )
+    #plt.xticks(ticks, rotation=90)
+    #plt.yticks(ticks)
     plt.colorbar(fraction=0.046, pad=0.035)
 
     if aperturexy is not None:
