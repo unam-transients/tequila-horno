@@ -16,17 +16,36 @@
 
 \section{Measured Performance}
 
+\subsection{Read Mode and SOFTGAIN}
+
+All of the tests here were performed with a TCS read mode of \verb|0-1-128| and a \verb|SOFTGAIN| value of 16. 
+
+The TCS read mode is three integers separated by hyphens: the first integer is the QHY SDK read mode (0 here), the seconds is the QHY SDK gain mode (0 here), and the third is the QHY SDK offset (128 here).
+
+The raw pixel values are divided by the \verb|SOFTGAIN| immediately after reading and before any further processing; the value of 16 converts the apparent 16-bit data values returned by the SDK into 12-bit values appropriate for the actual ADC. Thus, the data values in the FITS files are in the range $[0,4095]$.
+
+\subsection{Gain and Read-Noise}
+
+In the laboratory on 2025-11-13 we measured a gain of 2.48 electrons/DN and a read noise of 2.6 electrons.
+
 \subsection{Zero-Point}
 
-We measured the zero-point by considering our observations of the star 149180247107173789 in the Pan-STARRS DR2 at $\alpha = 24.710659$ deg and $\delta = 34.319267$ deg (J2000). This star is the brightest star near GRB 260131A and appears in multiple exposures of 60 seconds taken on the night of 2026-02-01 UTC.
+We measured the zero-point by considering our observations of the star 149180247107173789 in the Pan-STARRS DR2 at $\alpha = 24.710659$ deg and $\delta = 34.319267$ deg (J2000). This star is the brightest star near GRB 260131A and appears in multiple exposures of 60 seconds taken on the night of 2026-02-01 UTC; see Figure~\ref{figure:zeropoint-star} for an example image. The star is saturated in the Pan-STARRS DR2 catalog, but has $r = 13.279 \pm 0.038$ in the APASS DR10.
 
 We performed aperture photometry with an aperture of radius 40 pixels (3.0 arcsec) and a sky annulus between 80 and 120 pixels (6.0 and 9.0 arcsec). The mean number of counts in the aperture was $1.09\times 10^5$ with a dispersion of about 1.7\%. The dispersion possibly arises from flat-field errors or seeing or tracking variations; we do not consider it to be worrisome in this context.
 
-The star has $r = 13.305$
+With an assumed gain of 2.48 electron/DN, the zero-point is $1.24\times 10^9$ electrons/s.
 
 \begin{figure}
     \includegraphics[width=\linewidth]{figure/zeropoint-star.png}
     \caption{The star at $\alpha = 24.710659$ deg and $\delta = 34.319267$ deg (J2000) used for the zero-point calibration is marked in red in this image.}
+    \label{figure:zeropoint-star}
 \end{figure}
+
+\section{Estimated Performance}
+
+\subsection{Photometric Performance}
+
+For a star of magnitude $
 
 \end{document}
