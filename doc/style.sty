@@ -1,0 +1,66 @@
+% LTeX: enabled=false
+
+% Use TeX Gyre Schola for text and math.
+
+\usepackage{unicode-math}
+\setmainfont[
+	BoldFont = texgyreschola-bold.otf,
+	BoldItalicFont = texgyreschola-bolditalic.otf,
+	ItalicFont = texgyreschola-italic.otf
+]{texgyreschola-regular.otf}
+\setmathfont{texgyreschola-math.otf}
+
+% Basic spacing.
+
+\setlength{\columnsep}{2em}
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{0.8ex plus 0.3ex}
+
+\newlength{\wboxwidth}
+\newcommand{\wbox}[3][r]{%
+  \settowidth{\wboxwidth}{#2}%
+  \makebox[\wboxwidth][#1]{#3}%
+}
+
+% Hyperreferences
+
+\usepackage{hyperref}
+
+% Nice tables
+
+\usepackage{tabularx}
+\usepackage{booktabs}
+
+% Diagrams with TikZ
+
+\usepackage{tikz}
+
+% Bibliography
+
+\usepackage[authoryear]{natbib}
+\bibpunct{(}{)}{;}{a}{}{,}
+
+% Units, etc.
+
+\newcommand{\unit}[1]{\ensuremath{\mathrm{#1}}}
+\newcommand{\micron}{\mbox{\textmu m}}
+\renewcommand{\deg}{\mbox{deg}}
+\newcommand{\sqdeg}{\mbox{$\deg^2$}}
+\newcommand{\persqdeg}{\mbox{$\deg^{-2}$}}
+\newcommand{\arcmin}{\mbox{arcmin}}
+\newcommand{\sqarcmin}{\mbox{\arcmin$^2$}}
+\newcommand{\persqarcmin}{\mbox{\arcmin$^{-2}$}}
+\newcommand{\arcsec}{\mbox{arcsec}}
+\newcommand{\sqarcsec}{\mbox{\arcsec$^2$}}
+\newcommand{\persqarcsec}{\mbox{\arcsec$^{-2}$}}
+\newcommand{\sqmm}{\mbox{mm$^2$}}
+\newcommand{\deighty}{\ensuremath{d_{80}}}
+\newcommand{\Hs}{\mbox{$H_\mathrm{s}$}}
+\newcommand{\Ravg}{\mbox{$R_\mathrm{avg}$}}
+\newcommand{\Tavg}{\mbox{$T_\mathrm{avg}$}}
+\newcommand{\mm}{\mbox{mm}}
+\newcommand{\AB}{\mbox{AB}}
+
+\newcommand{\code}[1]{{\ttfamily #1}}
+

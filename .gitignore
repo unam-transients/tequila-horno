@@ -1,2 +1,6 @@
 sandbox/
 *.pyc
+doc/report.log
+doc/report.out
+doc/report.synctex.gz
+doc/report.aux

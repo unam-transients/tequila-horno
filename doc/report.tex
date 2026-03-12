@@ -1,0 +1,32 @@
+%!TEX program = xelatex
+%!LW recipe=latexmk (xelatex)
+% LTeX: enabled=true
+
+\documentclass[10pt]{article}
+
+\input{style.sty}
+
+\title{TEQUILA Commissioning Report}
+\author{Alan M. Watson \& Noémie Globus}
+\date{11 March 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{Measured Performance}
+
+\subsection{Zero-Point}
+
+We measured the zero-point by considering our observations of the star 149180247107173789 in the Pan-STARRS DR2 at $\alpha = 24.710659$ deg and $\delta = 34.319267$ deg (J2000). This star is the brightest star near GRB 260131A and appears in multiple exposures of 60 seconds taken on the night of 2026-02-01 UTC.
+
+We performed aperture photometry with an aperture of radius 40 pixels (3.0 arcsec) and a sky annulus between 80 and 120 pixels (6.0 and 9.0 arcsec). The mean number of counts in the aperture was $1.09\times 10^5$ with a dispersion of about 1.7\%. The dispersion possibly arises from flat-field errors or seeing or tracking variations; we do not consider it to be worrisome in this context.
+
+The star has $r = 13.305$
+
+\begin{figure}
+    \includegraphics[width=\linewidth]{figure/zeropoint-star.png}
+    \caption{The star at $\alpha = 24.710659$ deg and $\delta = 34.319267$ deg (J2000) used for the zero-point calibration is marked in red in this image.}
+\end{figure}
+
+\end{document}

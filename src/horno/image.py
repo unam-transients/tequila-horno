@@ -157,9 +157,6 @@ def show(
 
     if aperturexy is not None:
         aperturexy = np.array(aperturexy)
-        aperturex = aperturexy[:,0] - nx / 2
-        aperturey = aperturexy[:,1] - ny / 2
-        aperturexy = np.transpose((aperturex, aperturey))
         if isinstance(apertureradius, (int, float)):
             apertureradius = [apertureradius]
         for apertureradius in apertureradius:
