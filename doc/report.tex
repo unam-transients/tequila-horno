@@ -46,6 +46,35 @@ With an assumed gain of 2.48 electron/DN, the zero-point is $1.24\times 10^9$ el
 
 \subsection{Photometric Performance}
 
-For a star of magnitude $
+In this section we construct a model for the signal-to-noise ratio for photometry. 
+The signal-to-noise ratio $R_1$ in a single exposure of time $t_1$ is given by
+\begin{equation}
+    R_1 = \frac{Z f t_1 10^{-0.4 m}}{\sqrt{Z f t_1 10^{-0.4 m} + n_\mathrm{pix}(\sigma_\mathrm{r}^2 + r_\mathrm{sky}t_1 +  r_\mathrm{dark}t_1)}},
+\end{equation}
+in which $Z$ is the zero-point count rate, $f$ is the aperture correction, $n_\mathrm{pix}$ is the number of pixels in the aperture, $\sigma_\mathrm{r}$ is the read noise, $r_\mathrm{sky}$ is the count rate per pixel from the sky, and $r_\mathrm{dark}$ is the count rate per pixel from the dark current.
+
+The zero-point count rate in $\mathrm{electron\,s^{-1}}$ was determined above to be
+\begin{equation}
+    Z \approx 1.24\times10^9.
+\end{equation}
+
+For a Gaussian profile, $z(r) = z(0) e^{-(r/\sigma)^2}$, we have
+\begin{equation}
+f = 1-e^{-(r/\sigma)^2},
+\end{equation}
+and the FWHM $w$ is related to $\sigma$ by $w = 2\sigma\sqrt{\ln2} \approx 1.665 \sigma$. It can be shown that the optimal aperture radius in the background-limited case is approximately $0.675 w$. That is, the optimum aperture diameter is about 1.35 times the FWHM. (Note that this aperture contains 71\% of the light, and so its diameter is quite close to $d_{80}$.)
+
+The read noise in electrons was measured to be
+\begin{equation}
+    \sigma_\mathrm{r} \approx 1.8.
+\end{equation}
+
+The sky brightness $\mu$ in $r$ has been measured to be about is about $19.2\ \mathrm{mag\,arcsec^{-2}}$ in bright time and $20.7\ \mathrm{mag\,arcsec^{-2}}$ in dark time. The pixel size has been measured to be $\alpha \approx 0.076$ arcsec. Thus,
+\begin{equation}
+r_d = \alpha^a Z 10^{-0.4 \mu},
+\end{equation}
+where $\alpha$ is measured in arcsec and $\mu$ in $\mathrm{mag\,arcsec^{-2}}$. Thus, 
+
+
 
 \end{document}
