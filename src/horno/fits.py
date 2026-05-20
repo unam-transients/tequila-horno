@@ -22,8 +22,9 @@ def _ihdu(fitspath):
 
 def readraw(fitspath, name=None, logger=None):
     logger = horno.log.getlogger(logger)
-    logger(name, "reading header and data from FITS file %s."
-        % (os.path.basename(fitspath))
+    logger(
+        name,
+        "reading header and data from FITS file %s." % (os.path.basename(fitspath)),
     )
     hdu = astropy.io.fits.open(fitspath)
     ihdu = _ihdu(fitspath)
@@ -35,8 +36,7 @@ def readraw(fitspath, name=None, logger=None):
 
 def readrawheader(fitspath, name=None, logger=None):
     logger = horno.log.getlogger(logger)
-    logger(name, "reading header from raw FITS file %s." % (os.path.basename(fitspath))
-    )
+    logger(name, "reading header from raw FITS file %s." % (os.path.basename(fitspath)))
     hdu = astropy.io.fits.open(fitspath)
     ihdu = _ihdu(fitspath)
     header = hdu[ihdu].header
@@ -56,9 +56,7 @@ def readrawdata(fitspath, name=None, logger=None):
 
 def readproduct(fitspath, name=None, logger=None):
     logger = horno.log.getlogger(logger)
-    logger(
-        "reading header from product file %s." % (os.path.basename(fitspath))
-    )
+    logger(name, "reading header from product file %s." % (os.path.basename(fitspath)))
     hdu = astropy.io.fits.open(fitspath)
     ihdu = _ihdu(fitspath)
     header = hdu[ihdu].header
@@ -69,9 +67,7 @@ def readproduct(fitspath, name=None, logger=None):
 
 def readproductheader(fitspath, name=None, logger=None):
     logger = horno.log.getlogger(logger)
-    logger(name, 
-        "reading header from product file %s." % (os.path.basename(fitspath))
-    )
+    logger(name, "reading header from product file %s." % (os.path.basename(fitspath)))
     hdu = astropy.io.fits.open(fitspath)
     ihdu = _ihdu(fitspath)
     header = hdu[ihdu].header
@@ -81,9 +77,7 @@ def readproductheader(fitspath, name=None, logger=None):
 
 def readproductdata(fitspath, name=None, logger=None):
     logger = horno.log.getlogger(logger)
-    logger(name, 
-        "reading data from product file %s." % (os.path.basename(fitspath))
-    )
+    logger(name, "reading data from product file %s." % (os.path.basename(fitspath)))
     hdu = astropy.io.fits.open(fitspath)
     ihdu = _ihdu(fitspath)
     data = np.array(hdu[ihdu].data, dtype=np.float32)
@@ -99,7 +93,8 @@ def writeproduct(
     endtimestamp=None,
     exposuretime=None,
     gain=None,
-    name=None, logger=None,
+    name=None,
+    logger=None,
 ):
     logger = horno.log.getlogger(logger)
     logger(name, "writing product file %s." % (os.path.basename(fitspath)))

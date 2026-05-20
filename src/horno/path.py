@@ -3,7 +3,14 @@ import horno.fits
 import horno.instrument
 
 
-def getrawfitspaths(fitspaths, exposuretime=None, fitspathsslice=None):
+def getrawfitspaths(
+    fitspaths,
+    exposuretime=None,
+    detectortemperature=None,
+    fitspathsslice=None,
+    name=None,
+    logger=None,
+):
     """
     Return an expanded and filtered list of FITS paths.
 
@@ -44,8 +51,19 @@ def getrawfitspaths(fitspaths, exposuretime=None, fitspathsslice=None):
         fitspaths = list(
             fitspath
             for fitspath in fitspaths
-            if horno.instrument.exposuretime(horno.fits.readrawheader(fitspath))
+            if horno.instrument.exposuretime(
+                horno.fits.readrawheader(fitspath, name=name, logger=logger)
+            )
             == exposuretime
+        )
+    if detectortemperature is not None:
+        fitspaths = list(
+            fitspath
+            for fitspath in fitspaths
+            if horno.instrument.detectortemperature(
+                horno.fits.readrawheader(fitspath, name=name, logger=logger)
+            )
+            == detectortemperature
         )
     if fitspathsslice == "firsthalf":
         fitspathsslice = slice(None, len(fitspaths) // 2)

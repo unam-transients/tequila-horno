@@ -151,6 +151,7 @@ def usefakeflat(name=None, logger=None):
 def makedark(
     fitspaths,
     exposuretime,
+    detectortemperature=None,
     darkpath="dark-{exposuretime}.fits",
     fitspathsslice=None,
     name="makedark",
@@ -164,7 +165,10 @@ def makedark(
     fitspathlist = horno.path.getrawfitspaths(
         fitspaths,
         exposuretime=exposuretime,
+        detectortemperature=detectortemperature,
         fitspathsslice=fitspathsslice,
+        name=name,
+        logger=logger,
     )
 
     if len(fitspathlist) == 0:
@@ -198,6 +202,10 @@ def makedark(
                 % fitsbasename,
             )
             continue
+        logger(
+            name,
+            "accepting %s." % fitsbasename,
+        )
         header, data = bake(fitspath, dotrim=True, name="makedark", logger=logger)
         headerlist.append(header)
         datalist.append(data)
