@@ -7,6 +7,7 @@ import photutils.aperture
 import photutils.psf
 
 import horno.image
+import horno.log
 
 def pointsource(
     header,
@@ -18,7 +19,10 @@ def pointsource(
     finderthreshold=10,
     show=False,
     verbose=False,
+    name="pointsource",
+    logger=None
 ):
+    logger = horno.log.getlogger(logger)
 
     if yslice is None:
         yslice = slice(0, None)
@@ -40,7 +44,7 @@ def pointsource(
     xcenter = findertable["xcentroid"].value[0]
     ycenter = findertable["ycentroid"].value[0]
     if verbose:
-        print("ycenter = %6.1f xcenter = %6.1f" % (ycenter, xcenter))
+        logger(name, "ycenter = %6.1f xcenter = %6.1f" % (ycenter, xcenter))
 
     if False:
         # Experimentally determine the centroid shifts.
@@ -50,7 +54,7 @@ def pointsource(
             y = findertable["ycentroid"].value[0]
             dx = x - xcenter
             dy = y - ycenter
-            print("dy = %+.2f dx = %+.2f" % (dy, dx))
+            logger(name, "dy = %+.2f dx = %+.2f" % (dy, dx))
 
     position = [[xcenter, ycenter]]
     fwhm = photutils.psf.fit_fwhm(
@@ -58,7 +62,7 @@ def pointsource(
     )
     fwhm = fwhm[0]
     if verbose:
-        print("fwhm = %.1f pixel (%.2f arcsec)" % (fwhm, fwhm * 0.15))
+        logger(name, "fwhm = %.1f pixel (%.2f arcsec)" % (fwhm, fwhm * 0.15))
 
     if show:
 
@@ -151,4 +155,4 @@ def pointsource(
         q = (s00 - s11) / smean
         u = (s01 - s10) / smean
         if verbose:
-            print("smean = %.3f q = %+.3f u = %+.3f" % (smean, q, u))
+            logger(name, "smean = %.3f q = %+.3f u = %+.3f" % (smean, q, u))

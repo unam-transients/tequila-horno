@@ -3,6 +3,8 @@ import astropy.io.fits
 import os
 from datetime import datetime
 
+import horno.log
+
 
 def _ihdu(fitspath):
     """
@@ -18,12 +20,11 @@ def _ihdu(fitspath):
         return 0
 
 
-def readraw(fitspath, name=None):
-    if name is not None:
-        print(
-            "%s: reading header and data from FITS file %s."
-            % (name, os.path.basename(fitspath))
-        )
+def readraw(fitspath, name=None, logger=None):
+    logger = horno.log.getlogger(logger)
+    logger(name, "reading header and data from FITS file %s."
+        % (os.path.basename(fitspath))
+    )
     hdu = astropy.io.fits.open(fitspath)
     ihdu = _ihdu(fitspath)
     header = hdu[ihdu].header
@@ -32,12 +33,10 @@ def readraw(fitspath, name=None):
     return header, data
 
 
-def readrawheader(fitspath, name=None):
-    if name is not None:
-        print(
-            "%s: reading header from raw FITS file %s."
-            % (name, os.path.basename(fitspath))
-        )
+def readrawheader(fitspath, name=None, logger=None):
+    logger = horno.log.getlogger(logger)
+    logger(name, "reading header from raw FITS file %s." % (os.path.basename(fitspath))
+    )
     hdu = astropy.io.fits.open(fitspath)
     ihdu = _ihdu(fitspath)
     header = hdu[ihdu].header
@@ -45,9 +44,9 @@ def readrawheader(fitspath, name=None):
     return header
 
 
-def readrawdata(fitspath, name=None):
-    if name is not None:
-        print("%s: reading data from raw file %s." % (name, os.path.basename(fitspath)))
+def readrawdata(fitspath, name=None, logger=None):
+    logger = horno.log.getlogger(logger)
+    logger(name, "reading data from raw file %s." % (os.path.basename(fitspath)))
     hdu = astropy.io.fits.open(fitspath)
     ihdu = _ihdu(fitspath)
     data = np.array(hdu[ihdu].data, dtype=np.float32)
@@ -55,12 +54,11 @@ def readrawdata(fitspath, name=None):
     return data
 
 
-def readproduct(fitspath, name=None):
-    if name is not None:
-        print(
-            "%s: reading header from product file %s."
-            % (name, os.path.basename(fitspath))
-        )
+def readproduct(fitspath, name=None, logger=None):
+    logger = horno.log.getlogger(logger)
+    logger(
+        "reading header from product file %s." % (os.path.basename(fitspath))
+    )
     hdu = astropy.io.fits.open(fitspath)
     ihdu = _ihdu(fitspath)
     header = hdu[ihdu].header
@@ -69,12 +67,11 @@ def readproduct(fitspath, name=None):
     return header, data
 
 
-def readproductheader(fitspath, name=None):
-    if name is not None:
-        print(
-            "%s: reading header from product file %s."
-            % (name, os.path.basename(fitspath))
-        )
+def readproductheader(fitspath, name=None, logger=None):
+    logger = horno.log.getlogger(logger)
+    logger(name, 
+        "reading header from product file %s." % (os.path.basename(fitspath))
+    )
     hdu = astropy.io.fits.open(fitspath)
     ihdu = _ihdu(fitspath)
     header = hdu[ihdu].header
@@ -82,12 +79,11 @@ def readproductheader(fitspath, name=None):
     return header
 
 
-def readproductdata(fitspath, name=None):
-    if name is not None:
-        print(
-            "%s: reading data from product file %s."
-            % (name, os.path.basename(fitspath))
-        )
+def readproductdata(fitspath, name=None, logger=None):
+    logger = horno.log.getlogger(logger)
+    logger(name, 
+        "reading data from product file %s." % (os.path.basename(fitspath))
+    )
     hdu = astropy.io.fits.open(fitspath)
     ihdu = _ihdu(fitspath)
     data = np.array(hdu[ihdu].data, dtype=np.float32)
@@ -98,15 +94,15 @@ def readproductdata(fitspath, name=None):
 def writeproduct(
     fitspath,
     data,
-    name=None,
     filter=None,
     starttimestamp=None,
     endtimestamp=None,
     exposuretime=None,
     gain=None,
+    name=None, logger=None,
 ):
-    if name is not None:
-        print("%s: writing product file %s." % (name, os.path.basename(fitspath)))
+    logger = horno.log.getlogger(logger)
+    logger(name, "writing product file %s." % (os.path.basename(fitspath)))
     header = astropy.io.fits.Header()
     if filter is not None:
         header.append(("FILTER", filter))
