@@ -2,11 +2,12 @@ import glob
 import horno.fits
 import horno.instrument
 
+
 def getrawfitspaths(fitspaths, exposuretime=None, fitspathsslice=None):
     """
     Return an expanded and filtered list of FITS paths.
 
-    The ``fitspath`` argument will be expanded by :func:`glob.glob`. This
+    The ``fitspaths`` argument will be expanded by :func:`glob.glob`. This
     expansion must give a list of names of FITS files or compressed FITS files.
     If ``exposuretime`` is not ``None``, then files which do not have that
     exposure time are eliminated from the list. Finally, if ``fitspathsslice``
@@ -28,7 +29,17 @@ def getrawfitspaths(fitspaths, exposuretime=None, fitspathsslice=None):
 
     :return: An expanded, filtered, and sliced list of FITS file name.
     """
-    fitspaths = sorted(glob.glob(fitspaths))
+
+    def flatten(lists):
+        """
+        Return a flattened list of lists.
+        """
+        return [item for sublist in lists for item in sublist]
+
+    if isinstance(fitspaths, str):
+        fitspaths = [fitspaths]
+    fitspaths = sorted(flatten(glob.glob(fitspath) for fitspath in fitspaths))
+
     if exposuretime is not None:
         fitspaths = list(
             fitspath
