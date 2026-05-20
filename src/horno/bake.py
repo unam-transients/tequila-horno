@@ -165,8 +165,6 @@ def makedark(
         fitspaths,
         exposuretime=exposuretime,
         fitspathsslice=fitspathsslice,
-        name=name,
-        logger=logger,
     )
 
     if len(fitspathlist) == 0:
@@ -176,11 +174,35 @@ def makedark(
     headerlist = []
     datalist = []
     for fitspath in fitspathlist:
-        header, data = bake(fitspath, name="makedark", dotrim=True)
+        fitsbasename = os.path.basename(fitspath)
+        header = horno.fits.readrawheader(fitspath, name="makedark", logger=logger)
+        # Reject darks taken in daylight, civil twilight, or evening nautical
+        # twilight, as these have noticeable light leaks.
+        startskystate = header["SSNSK"]
+        endskystate = header["ESNSK"]
+        startsunha = float(header["SSNHA"])
+        if startskystate == "daylight" or endskystate == "daylight":
+            logger(name, "rejecting %s as it was taken in daylight." % fitsbasename)
+            continue
+        if startskystate == "civiltwilight" or endskystate == "civiltwilight":
+            logger(
+                name, "rejecting %s as it was taken in civil twilight." % fitsbasename
+            )
+            continue
+        if (
+            startskystate == "nauticaltwilight" or endskystate == "nauticaltwilight"
+        ) and startsunha > 0:
+            logger(
+                name,
+                "rejecting %s as it was taken in evening nautical twilight."
+                % fitsbasename,
+            )
+            continue
+        header, data = bake(fitspath, dotrim=True, name="makedark", logger=logger)
         headerlist.append(header)
         datalist.append(data)
 
-    logger(name, "makedark: averaging %d darks with rejection." % len(datalist))
+    logger(name, "averaging %d darks with rejection." % len(datalist))
     global _darkdata
     _darkdata, darksigma = horno.image.clippedmeanandsigma(datalist, sigma=3, axis=0)
 
@@ -235,8 +257,7 @@ def makeflat(
         if np.isnan(data[centeryslice, centerxslice]).all():
             logger(
                 name,
-                "makedark: rejected %s: no valid data in center."
-                % os.path.basename(fitspath),
+                "rejected %s: no valid data in center." % os.path.basename(fitspath),
             )
             continue
         median = np.nanmedian(data[centeryslice, centerxslice])
