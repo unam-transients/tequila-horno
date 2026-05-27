@@ -58,7 +58,7 @@ def pointsource(
 
     position = [[xcenter, ycenter]]
     fwhm = photutils.psf.fit_fwhm(
-        datasum - median, xypos=position, fit_shape=(41, 41), fwhm=15
+        datasum - median, xypos=position, fit_shape=41, fwhm=15, mask=np.isnan(datasum)
     )
     fwhm = fwhm[0]
     if verbose:
