@@ -38,11 +38,11 @@ def pointsource(
 
     mean, median, sigma = horno.image.sigmaclippedstats(datasum)
     finder = photutils.detection.DAOStarFinder(
-        fwhm=15, threshold=finderthreshold * sigma, brightest=1
+        fwhm=15, threshold=finderthreshold * sigma, n_brightest=1
     )
     findertable = finder(datasum)
-    xcenter = findertable["xcentroid"].value[0]
-    ycenter = findertable["ycentroid"].value[0]
+    xcenter = findertable["x_centroid"].value[0]
+    ycenter = findertable["y_centroid"].value[0]
     if verbose:
         logger(name, "ycenter = %6.1f xcenter = %6.1f" % (ycenter, xcenter))
 
