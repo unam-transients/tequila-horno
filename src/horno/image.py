@@ -113,8 +113,18 @@ def uniformfilter(data, size):
 
 
 def show(
-    data, zrange=False, zscale=False, contrast=0.25, zmin=None, zmax=None, small=False,
-    aperturexy=None, apertureradius=[], aperturecolor="red"
+    data,
+    zrange=False,
+    zscale=False,
+    contrast=0.25,
+    zmin=None,
+    zmax=None,
+    small=False,
+    aperturexy=None,
+    apertureradius=[],
+    aperturecolor="red",
+    cmap="viridis",
+    invertcmap=False,
 ):
 
     if zmin is not None and zmax is not None:
@@ -148,11 +158,9 @@ def show(
         plt.figure(figsize=(5, 5))
     else:
         plt.figure(figsize=(10, 10))
-    plt.imshow(
-        data, origin="lower", norm=norm,
-    )
-    #plt.xticks(ticks, rotation=90)
-    #plt.yticks(ticks)
+    plt.imshow(data, origin="lower", norm=norm, cmap=cmap)
+    # plt.xticks(ticks, rotation=90)
+    # plt.yticks(ticks)
     plt.colorbar(fraction=0.046, pad=0.035)
 
     if aperturexy is not None:
@@ -160,7 +168,9 @@ def show(
         if isinstance(apertureradius, (int, float)):
             apertureradius = [apertureradius]
         for apertureradius in apertureradius:
-            apertures = photutils.aperture.CircularAperture(aperturexy, r=apertureradius)
+            apertures = photutils.aperture.CircularAperture(
+                aperturexy, r=apertureradius
+            )
             apertures.plot(color=aperturecolor, lw=1.5, alpha=0.5)
 
     plt.show()
