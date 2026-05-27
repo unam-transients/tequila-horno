@@ -353,7 +353,7 @@ def makeflat(
     maskeddatalist = []
     for data in datalist:
         data[np.where(maskdata == 0)] = np.nan
-        data / np.nanmedian(data)
+        data /= np.nanmedian(data)
         maskeddatalist.append(data)
 
     logger(name, "averaging %d flats with rejection." % (len(maskeddatalist)))
