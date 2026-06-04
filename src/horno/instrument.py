@@ -19,16 +19,16 @@ def offsetxslice(header):
     return slice(4110, 4116)
 
 def offsetyslice(header):
-    return slice(0, 2997)
+    return slice(0, 2998)
 
 def trimyslice(header):
-    return slice(0, 2997)
+    return slice(0, 2998)
 
 def trimxslice(header):
-    return slice(4, 4109)
+    return slice(4, 4110)
 
 def trimyslice(header):
-    return slice(0, 2997)
+    return slice(0, 2998)
 
 def flatmax(header):
     return 3000
