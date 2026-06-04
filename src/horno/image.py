@@ -125,6 +125,7 @@ def show(
     aperturecolor="red",
     cmap="viridis",
     invertcmap=False,
+    path=None,
 ):
 
     if zmin is not None and zmax is not None:
@@ -155,13 +156,15 @@ def show(
     )
 
     if small:
-        plt.figure(figsize=(5, 5))
+        plt.figure(figsize=(5, 5 * ny / nx))
     else:
-        plt.figure(figsize=(10, 10))
+        plt.figure(figsize=(10, 10 * ny / nx))
     plt.imshow(data, origin="lower", norm=norm, cmap=cmap)
     # plt.xticks(ticks, rotation=90)
     # plt.yticks(ticks)
-    plt.colorbar(fraction=0.046, pad=0.035)
+    fraction=0.03
+    pad=0.02
+    plt.colorbar(fraction=fraction, aspect=1/fraction, pad=pad, shrink=1/(1+fraction+pad))
 
     if aperturexy is not None:
         aperturexy = np.array(aperturexy)
@@ -172,5 +175,8 @@ def show(
                 aperturexy, r=apertureradius
             )
             apertures.plot(color=aperturecolor, lw=1.5, alpha=0.5)
+
+    if path is not None:
+        plt.savefig(path)
 
     plt.show()
