@@ -74,12 +74,14 @@ def bake(
     nwindow=None,
     nmargin=0,
     logger=None,
+    verbose=True,
 ):
 
     logger = horno.log.getlogger(logger)
 
-    logger(name, "reading %s." % (os.path.basename(fitspath)))
-    header, data = horno.fits.readraw(fitspath, name=name, logger=logger)
+    if verbose:
+        logger(name, "reading %s." % (os.path.basename(fitspath)))
+    header, data = horno.fits.readraw(fitspath, name=name, logger=logger, verbose=verbose)
 
     # Set invalid pixels to nan.
     data[np.where(data == horno.instrument.datamax(header))] = np.nan
@@ -89,33 +91,39 @@ def bake(
         and horno.instrument.trimyslice(header) is not None
         and horno.instrument.trimxslice(header) is not None
     ):
-        logger(name, "trimming.")
+        if verbose:
+            logger(name, "trimming.")
         data = data[
             horno.instrument.trimyslice(header), horno.instrument.trimxslice(header)
         ]
 
     if dodark and _darkdata is not None:
-        logger(name, "subtracting dark.")
+        if verbose:
+            logger(name, "subtracting dark.")
         data -= _darkdata
 
     if doflat and _flatdata is not None:
-        logger(name, "dividing by flat.")
+        if verbose:
+            logger(name, "dividing by flat.")
         data /= _flatdata
 
     if dosky:
         median = np.nanmedian(data)
-        logger(name, "subtracting median sky of %.1f DN." % (median))
+        if verbose:
+            logger(name, "subtracting median sky of %.1f DN." % (median))
         # data -= np.nanmedian(data, axis=0, keepdims=True)
         # data -= np.nanmedian(data, axis=1, keepdims=True)
         data -= np.nanmedian(data, keepdims=True)
 
     if dorotate:
-        logger(name, "rotating to standard orientation.")
+        if verbose:
+            logger(name, "rotating to standard orientation.")
         data = horno.instrument.dorotate(header, data, name=name, logger=logger)
 
     if nwindow is not None:
 
-        logger(name, "windowing to %d by %d." % (nwindow, nwindow))
+        if verbose:
+            logger(name, "windowing to %d by %d." % (nwindow, nwindow))
 
         assert nwindow <= data.shape[0]
         assert nwindow <= data.shape[1]
@@ -230,7 +238,12 @@ def makedark(
 
 
 def makeflat(
-    fitspaths, flatpath="flat.fits", fitspathsslice=None, name="makeflat", logger=None
+    fitspaths,
+    flatpath="flat.fits",
+    fitspathsslice=None,
+    pmax=0.2,
+    name="makeflat",
+    logger=None,
 ):
 
     logger = horno.log.getlogger(logger)
@@ -292,10 +305,17 @@ def makeflat(
             % (median00, median01, median10, median11),
         )
 
-        meanmedian = 0.25 * (median00 + median01 + median10 + median11)
-        q = (median00 - median11) / meanmedian
-        u = (median01 - median10) / meanmedian
-        logger(name, "apparent polarization in flat is q = %+.3f u = %+.3f." % (q, u))
+        q = (median00 - median11) / (median00 + median11)
+        u = (median01 - median10) / (median01 + median10)
+        p = np.sqrt(np.square(q) + np.square(u))
+        logger(
+            name,
+            "apparent polarization in flat is q = %+.3f u = %+.3f p = %.3f."
+            % (q, u, p),
+        )
+        if p > pmax:
+            logger(name, "rejecting image: apparent polarization is too high.")
+            continue
 
         data[0::2, 0::2] /= median00
         data[0::2, 1::2] /= median01
@@ -379,13 +399,23 @@ def makeflat(
     return
 
 
-def makeobjects(fitspaths, fitspathsslice=None, name="makeobjects", logger=None):
+def makeobjects(
+    fitspaths,
+    fitspathsslice=None,
+    dotrim=True,
+    dodark=True,
+    doflat=True,
+    name="makeobjects",
+    logger=None,
+    verbose=True,
+):
 
     logger = horno.log.getlogger(logger)
 
     ############################################################################
 
-    logger(name, "making objects %s." % fitspaths)
+    if verbose:
+        logger(name, "making objects %s." % fitspaths)
 
     ############################################################################
 
@@ -403,9 +433,10 @@ def makeobjects(fitspaths, fitspathsslice=None, name="makeobjects", logger=None)
         header, data = bake(
             fitspath,
             name="makeobjects",
-            dotrim=True,
-            dodark=True,
-            doflat=True,
+            dotrim=dotrim,
+            dodark=dodark,
+            doflat=doflat,
+            verbose=verbose,
         )
 
         headerlist.append(header)
@@ -413,6 +444,7 @@ def makeobjects(fitspaths, fitspathsslice=None, name="makeobjects", logger=None)
 
     ############################################################################
 
-    logger(name, "finished.")
+    if verbose:
+        logger(name, "finished.")
 
     return headerlist, datalist

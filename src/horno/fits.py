@@ -20,12 +20,13 @@ def _ihdu(fitspath):
         return 0
 
 
-def readraw(fitspath, name=None, logger=None):
+def readraw(fitspath, name=None, logger=None, verbose=True):
     logger = horno.log.getlogger(logger)
-    logger(
-        name,
-        "reading header and data from FITS file %s." % (os.path.basename(fitspath)),
-    )
+    if verbose:
+        logger(
+            name,
+            "reading header and data from FITS file %s." % (os.path.basename(fitspath)),
+        )
     hdu = astropy.io.fits.open(fitspath)
     ihdu = _ihdu(fitspath)
     header = hdu[ihdu].header

@@ -7,7 +7,9 @@ import photutils.aperture
 import photutils.psf
 
 import horno.image
+import horno.instrument
 import horno.log
+
 
 def pointsource(
     header,
@@ -20,7 +22,7 @@ def pointsource(
     show=False,
     verbose=False,
     name="pointsource",
-    logger=None
+    logger=None,
 ):
     logger = horno.log.getlogger(logger)
 
@@ -38,9 +40,15 @@ def pointsource(
 
     mean, median, sigma = horno.image.sigmaclippedstats(datasum)
     finder = photutils.detection.DAOStarFinder(
-        fwhm=15, threshold=finderthreshold * sigma, n_brightest=1
+        fwhm=10,
+        threshold=finderthreshold * sigma,
+        n_brightest=1,
+        exclude_border=True,
     )
     findertable = finder(datasum)
+    if findertable is None:
+        logger(name, "no sources found")
+        return 0, 0, 0, 0, 0, 0, 0, 0, 0
     xcenter = findertable["x_centroid"].value[0]
     ycenter = findertable["y_centroid"].value[0]
     if verbose:
@@ -97,62 +105,93 @@ def pointsource(
             zrange=True,
         )
 
-    if not math.isnan(fwhm):
+    if math.isnan(fwhm):
+        return 0, 0, 0, 0, 0, 0, 0, 0, 0
 
-        objectradius = 1.0 * fwhm
-        skyinnerradius = 2.0 * fwhm
-        skyouterradius = 3.0 * fwhm
+    objectradius = 1.0 * fwhm
+    skyinnerradius = 2.0 * fwhm
+    skyouterradius = 3.0 * fwhm
 
-        def photometerone(data, y, x):
+    def photometerone(data, y, x):
 
-            position = [[x, y]]
+        position = [[x, y]]
 
-            objectaperture = photutils.aperture.CircularAperture(position, objectradius)
-            skyaperture = photutils.aperture.CircularAnnulus(
-                position, skyinnerradius, skyouterradius
-            )
-
-            objectstatistics = photutils.aperture.ApertureStats(data, objectaperture)
-            skystatistics = photutils.aperture.ApertureStats(data, skyaperture)
-
-            objectsum = objectstatistics.sum
-            objectnpix = objectstatistics.sum_aper_area.value
-
-            skylevel = skystatistics.mean
-            skystd = skystatistics.std
-            skynpix = skystatistics.sum_aper_area.value
-
-            objectsum = objectsum - objectnpix * skylevel
-
-            gain = 2
-            objectstd = np.sqrt(objectsum * gain) / gain
-
-            return objectsum[0]
-
-        dcenter = 0.25
-        s00 = photometerone(
-            data00,
-            ycenter + dcenter,
-            xcenter + dcenter,
-        )
-        s01 = photometerone(
-            data01,
-            ycenter + dcenter,
-            xcenter - dcenter,
-        )
-        s10 = photometerone(
-            data10,
-            ycenter - dcenter,
-            xcenter + dcenter,
-        )
-        s11 = photometerone(
-            data11,
-            ycenter - dcenter,
-            xcenter - dcenter,
+        objectaperture = photutils.aperture.CircularAperture(position, objectradius)
+        skyaperture = photutils.aperture.CircularAnnulus(
+            position, skyinnerradius, skyouterradius
         )
 
-        smean = 0.25 * (s00 + s01 + s10 + s11)
-        q = (s00 - s11) / smean
-        u = (s01 - s10) / smean
-        if verbose:
-            logger(name, "smean = %.3f q = %+.3f u = %+.3f" % (smean, q, u))
+        objectstatistics = photutils.aperture.ApertureStats(data, objectaperture)
+        skystatistics = photutils.aperture.ApertureStats(data, skyaperture)
+
+        objectsum = objectstatistics.sum
+        objectnpix = objectstatistics.sum_aper_area.value
+
+        skylevel = skystatistics.mean
+        skystd = skystatistics.std
+
+        objectsum = objectsum - objectnpix * skylevel
+
+        objectstd = np.sqrt(
+            max(0, objectsum) * horno.instrument.gain(header)
+        ) / horno.instrument.gain(header)
+
+        totalstd = np.sqrt(np.square(objectstd) + objectnpix * np.square(skystd))
+
+        return objectsum[0], totalstd[0]
+
+    dcenter = 0.25
+    n00, sn00 = photometerone(
+        data00,
+        ycenter + dcenter,
+        xcenter + dcenter,
+    )
+    n01, sn01 = photometerone(
+        data01,
+        ycenter + dcenter,
+        xcenter - dcenter,
+    )
+    n10, sn10 = photometerone(
+        data10,
+        ycenter - dcenter,
+        xcenter + dcenter,
+    )
+    n11, sn11 = photometerone(
+        data11,
+        ycenter - dcenter,
+        xcenter - dcenter,
+    )
+
+    if verbose:
+        logger(name, "n00 = %.3e n00 / sn00 = %.1f" % (n00, n00 / sn00))
+        logger(name, "n01 = %.3e n01 / sn01 = %.1f" % (n01, n01 / sn01))
+        logger(name, "n10 = %.3e n10 / sn10 = %.1f" % (n10, n10 / sn10))
+        logger(name, "n11 = %.3e n11 / sn11 = %.1f" % (n11, n11 / sn11))
+
+    nmean = 0.25 * (n00 + n01 + n10 + n11)
+    snmean = np.sqrt(
+        0.25 * (np.square(sn00) + np.square(sn00) + np.square(sn10) + np.square(sn11))
+    )
+
+    q = (n00 - n11) / (n00 + n11)
+    u = (n01 - n10) / (n01 + n10)
+
+    sq = (
+        2
+        / np.square(n00 + n11)
+        * np.sqrt(np.square(n00 * sn11) + np.square(n11 * sn00))
+    )
+    su = (
+        2
+        / np.square(n01 + n10)
+        * np.sqrt(np.square(n01 * sn10) + np.square(n10 * sn01))
+    )
+
+    if verbose:
+        logger(
+            name,
+            "nmean = %.2e ± %.2e  q = %+.4f ± %.4f  u = %+.4f ± %.4f"
+            % (nmean, snmean, q, sq, u, su),
+        )
+
+    return ycenter, xcenter, fwhm, nmean, snmean, q, sq, u, su

@@ -26,3 +26,9 @@ def trimyslice(header):
 
 def flatmax(header):
     return 3000
+
+def gain(header):
+    return 2.6
+
+def readnoise(header):
+    return 2.7
