@@ -15,14 +15,20 @@ def detectortemperature(header):
 def datamax(header):
     return 4095
 
+def offsetxslice(header):
+    return slice(4110, 4116)
 
-def trimxslice(header):
-    return slice(4, 4109)
-
+def offsetyslice(header):
+    return slice(0, 2997)
 
 def trimyslice(header):
     return slice(0, 2997)
 
+def trimxslice(header):
+    return slice(4, 4109)
+
+def trimyslice(header):
+    return slice(0, 2997)
 
 def flatmax(header):
     return 3000

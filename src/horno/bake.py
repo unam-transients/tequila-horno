@@ -65,6 +65,7 @@ def writeflat(path="flat.fits", name="writeflat", logger=None):
 def bake(
     fitspath,
     name="bake",
+    dooffset=False,
     dotrim=False,
     dodark=False,
     doflat=False,
@@ -85,6 +86,18 @@ def bake(
 
     # Set invalid pixels to nan.
     data[np.where(data == horno.instrument.datamax(header))] = np.nan
+
+    if (
+        dooffset
+        and horno.instrument.offsetyslice(header) is not None
+        and horno.instrument.offsetxslice(header) is not None
+    ):
+        if verbose:
+            logger(name, "removing offset.")
+        offset = np.nanmedian(data[horno.instrument.offsetyslice(header), horno.instrument.offsetxslice(header)])
+        if verbose:
+            logger(name, "offset is %.2f." % offset)
+        data -= offset
 
     if (
         dotrim
@@ -214,7 +227,7 @@ def makedark(
             name,
             "accepting %s." % fitsbasename,
         )
-        header, data = bake(fitspath, dotrim=True, name="makedark", logger=logger)
+        header, data = bake(fitspath, dooffset=True, dotrim=True, name="makedark", logger=logger)
         headerlist.append(header)
         datalist.append(data)
 
@@ -270,6 +283,7 @@ def makeflat(
         header, data = bake(
             fitspath,
             name="makeflat",
+            dooffset=True,
             dotrim=True,
             dodark=True,
         )
@@ -402,6 +416,7 @@ def makeflat(
 def makeobjects(
     fitspaths,
     fitspathsslice=None,
+    dooffset=True,
     dotrim=True,
     dodark=True,
     doflat=True,
@@ -433,6 +448,7 @@ def makeobjects(
         header, data = bake(
             fitspath,
             name="makeobjects",
+            dooffset=dooffset,
             dotrim=dotrim,
             dodark=dodark,
             doflat=doflat,
