@@ -10,6 +10,7 @@ def getrawfitspaths(
     fitspathsslice=None,
     name=None,
     logger=None,
+    verbose=True,
 ):
     """
     Return an expanded and filtered list of FITS paths.
@@ -52,7 +53,7 @@ def getrawfitspaths(
             fitspath
             for fitspath in fitspaths
             if horno.instrument.exposuretime(
-                horno.fits.readrawheader(fitspath, name=name, logger=logger)
+                horno.fits.readrawheader(fitspath, name=name, logger=logger, verbose=verbose)
             )
             == exposuretime
         )
@@ -61,7 +62,7 @@ def getrawfitspaths(
             fitspath
             for fitspath in fitspaths
             if horno.instrument.detectortemperature(
-                horno.fits.readrawheader(fitspath, name=name, logger=logger)
+                horno.fits.readrawheader(fitspath, name=name, logger=logger, verbose=verbose)
             )
             == detectortemperature
         )
