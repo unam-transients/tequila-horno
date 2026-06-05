@@ -178,6 +178,7 @@ def bake(
 
     # Set invalid pixels to nan.
     data[np.where(data == horno.instrument.datamax(header))] = np.nan
+    data[np.where(data == horno.instrument.datamin(header))] = np.nan
 
     if (
         dooffset
