@@ -9,7 +9,7 @@ def exposuretime(header):
 
 
 def detectortemperature(header):
-    return 0.5 * (float(header["SDTTM"]) + float(header["SDTTM"]))
+    return 0.5 * (float(header["SDTTM"]) + float(header["EDTTM"]))
 
 
 def datamin(header):

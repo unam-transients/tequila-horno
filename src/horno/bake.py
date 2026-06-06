@@ -16,6 +16,8 @@ _flatdata = None
 
 
 def _darkpath(exposuretime, detectortemperature, tag):
+    exposuretime = round(exposuretime)
+    detectortemperature = round(detectortemperature)
     if tag is None:
         tagtext = ""
     else:
@@ -32,19 +34,21 @@ def _flatpath(tag):
 
 
 def _setdarkdata(exposuretime, detectortemperature, data):
-    exposuretime = int(exposuretime)
-    detectortemperature = int(detectortemperature)
+    exposuretime = round(exposuretime)
+    detectortemperature = round(detectortemperature)
     key = "%d@%+d" % (exposuretime, detectortemperature)
     global _darkdata
     _darkdata[key] = data
 
 
 def _getdarkdata(exposuretime, detectortemperature):
-    exposuretime = int(exposuretime)
-    detectortemperature = int(detectortemperature)
+    exposuretime = round(exposuretime)
+    detectortemperature = round(detectortemperature)
     key = "%d@%+d" % (exposuretime, detectortemperature)
+    print(key)
+    print(_darkdata.keys())
     if key not in _darkdata:
-        return np.nan
+        raise RuntimeError("no dark is available.")
     else:
         return _darkdata[key]
 
@@ -210,7 +214,14 @@ def bake(
 
     if dodark:
         if verbose:
-            logger(name, "subtracting dark.")
+            logger(
+                name,
+                "subtracting dark for %.0f seconds at %+.0f C."
+                % (
+                    round(horno.instrument.exposuretime(header)),
+                    round(horno.instrument.detectortemperature(header)),
+                ),
+            )
         data -= _getdarkdata(
             horno.instrument.exposuretime(header),
             horno.instrument.detectortemperature(header),
@@ -261,6 +272,9 @@ def makedark(
     verbose=True,
     show=True,
 ):
+
+    exposuretime = round(exposuretime)
+    detectortemperature = round(detectortemperature)
 
     logger = horno.log.getlogger(logger)
 

@@ -52,19 +52,19 @@ def getrawfitspaths(
         fitspaths = list(
             fitspath
             for fitspath in fitspaths
-            if horno.instrument.exposuretime(
+            if round(horno.instrument.exposuretime(
                 horno.fits.readrawheader(fitspath, name=name, logger=logger, verbose=verbose)
-            )
-            == exposuretime
+            ))
+            == round(exposuretime)
         )
     if detectortemperature is not None:
         fitspaths = list(
             fitspath
             for fitspath in fitspaths
-            if horno.instrument.detectortemperature(
+            if round(horno.instrument.detectortemperature(
                 horno.fits.readrawheader(fitspath, name=name, logger=logger, verbose=verbose)
-            )
-            == detectortemperature
+            ))
+            == round(detectortemperature)
         )
     if fitspathsslice == "firsthalf":
         fitspathsslice = slice(None, len(fitspaths) // 2)
