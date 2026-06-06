@@ -1,5 +1,6 @@
 import math
 import os.path
+import warnings
 
 import numpy as np
 
@@ -189,12 +190,16 @@ def bake(
     ):
         if verbose:
             logger(name, "removing offset.")
-        offset = np.nanmedian(
-            data[
-                horno.instrument.offsetyslice(header),
-                horno.instrument.offsetxslice(header),
-            ]
-        )
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            offset = np.nanmedian(
+                data[
+                    horno.instrument.offsetyslice(header),
+                    horno.instrument.offsetxslice(header),
+                ]
+            )
+        if math.isnan(offset):
+            raise RuntimeError("image offset is NaN.")
         if verbose:
             logger(name, "offset is %.2f." % offset)
         data -= offset
@@ -314,13 +319,13 @@ def makedark(
         startsunha = float(header["SSNHA"])
         if startskystate == "daylight" or endskystate == "daylight":
             if verbose:
-                logger(name, "rejecting %s as it was taken in daylight." % fitsbasename)
+                logger(name, "rejecting %s: taken in daylight." % fitsbasename)
             continue
         if startskystate == "civiltwilight" or endskystate == "civiltwilight":
             if verbose:
                 logger(
                     name,
-                    "rejecting %s as it was taken in civil twilight." % fitsbasename,
+                    "rejecting %s: taken in civil twilight." % fitsbasename,
                 )
             continue
         if (
@@ -329,23 +334,28 @@ def makedark(
             if verbose:
                 logger(
                     name,
-                    "rejecting %s as it was taken in evening nautical twilight."
+                    "rejecting %s: taken in evening nautical twilight."
                     % fitsbasename,
                 )
+            continue
+        try:
+            header, data = bake(
+                fitspath,
+                dooffset=True,
+                dotrim=True,
+                name="makedark",
+                logger=logger,
+                verbose=verbose,
+            )
+        except RuntimeError as e:
+            if verbose:
+                logger(name, "rejecting %s: %s" % (fitsbasename, e))
             continue
         if verbose:
             logger(
                 name,
                 "accepting %s." % fitsbasename,
             )
-        header, data = bake(
-            fitspath,
-            dooffset=True,
-            dotrim=True,
-            name="makedark",
-            logger=logger,
-            verbose=verbose,
-        )
         headerlist.append(header)
         datalist.append(data)
 
@@ -415,20 +425,26 @@ def makeflat(
     headerlist = []
     datalist = []
     for fitspath in fitspathlist:
-        header, data = bake(
+        fitsbasename = os.path.basename(fitspath)
+        try:
+            header, data = bake(
             fitspath,
             name="makeflat",
             dooffset=True,
             dotrim=True,
             dodark=True,
         )
+        except RuntimeError as e:
+            if verbose:
+                logger(name, "rejecting %s: %s" % (fitsbasename, e))
+            continue
         centeryslice = slice(int(data.shape[0] * 1 / 4), int(data.shape[0] * 3 / 4))
         centerxslice = slice(int(data.shape[1] * 1 / 4), int(data.shape[1] * 3 / 4))
         if np.isnan(data[centeryslice, centerxslice]).all():
             if verbose:
                 logger(
                     name,
-                    "rejected %s: no valid data in center."
+                    "rejecting %s: no valid data in center."
                     % os.path.basename(fitspath),
                 )
                 continue
@@ -437,10 +453,8 @@ def makeflat(
             logger(name, "median in center is %.2f DN." % median)
         if median > horno.instrument.flatmax(header):
             if verbose:
-                logger(name, "rejecting image: median in center is too high.")
+                logger(name, "rejecting %s: median in center is too high." % fitsbasename)
             continue
-        if verbose:
-            logger(name, "accepted %s." % os.path.basename(fitspath))
 
         centeryslice = slice(
             int(data.shape[0] / 2 * 1 / 4), int(data.shape[0] / 2 * 3 / 4)
@@ -471,8 +485,11 @@ def makeflat(
             )
         if p > pmax:
             if verbose:
-                logger(name, "rejecting image: apparent polarization is too high.")
+                logger(name, "rejecting %s: apparent polarization is too high." % fitsbasename)
             continue
+
+        if verbose:
+            logger(name, "accepting %s." % fitsbasename)
 
         data[0::2, 0::2] /= median00
         data[0::2, 1::2] /= median01
