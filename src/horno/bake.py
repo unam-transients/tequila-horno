@@ -45,8 +45,6 @@ def _getdarkdata(exposuretime, detectortemperature):
     exposuretime = round(exposuretime)
     detectortemperature = round(detectortemperature)
     key = "%d@%+d" % (exposuretime, detectortemperature)
-    print(key)
-    print(_darkdata.keys())
     if key not in _darkdata:
         raise RuntimeError("no dark is available.")
     else:
