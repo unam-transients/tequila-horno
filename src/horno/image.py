@@ -126,6 +126,7 @@ def show(
     cmap="viridis",
     invertcmap=False,
     path=None,
+    colorbar=True,
 ):
 
     if zmin is not None and zmax is not None:
@@ -164,7 +165,8 @@ def show(
     # plt.yticks(ticks)
     fraction=0.03
     pad=0.02
-    plt.colorbar(fraction=fraction, aspect=1/fraction, pad=pad, shrink=1/(1+fraction+pad))
+    if colorbar:
+        plt.colorbar(fraction=fraction, aspect=1/fraction, pad=pad, shrink=1/(1+fraction+pad))
 
     if aperturexy is not None:
         aperturexy = np.array(aperturexy)
