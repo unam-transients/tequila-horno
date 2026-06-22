@@ -19,6 +19,7 @@ def pointsource(
     yslice=None,
     xslice=None,
     finderthreshold=10,
+    fwhm=10,
     show=False,
     verbose=False,
     name="pointsource",
@@ -40,7 +41,7 @@ def pointsource(
 
     mean, median, sigma = horno.image.sigmaclippedstats(datasum)
     finder = photutils.detection.DAOStarFinder(
-        fwhm=10,
+        fwhm=fwhm,
         threshold=finderthreshold * sigma,
         n_brightest=1,
         exclude_border=True,
