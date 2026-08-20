@@ -16,9 +16,13 @@ _darkdata = {}
 _flatdata = None
 
 
+def _mapdetectortemperature(detectortemperature):
+    return 10 * round(detectortemperature / 10)
+
+
 def _darkpath(exposuretime, detectortemperature, tag):
     exposuretime = round(exposuretime)
-    detectortemperature = round(detectortemperature)
+    detectortemperature = _mapdetectortemperature(detectortemperature)
     if tag is None:
         tagtext = ""
     else:
@@ -36,7 +40,7 @@ def _flatpath(tag):
 
 def _setdarkdata(exposuretime, detectortemperature, data):
     exposuretime = round(exposuretime)
-    detectortemperature = round(detectortemperature)
+    detectortemperature = _mapdetectortemperature(detectortemperature)
     key = "%d@%+d" % (exposuretime, detectortemperature)
     global _darkdata
     _darkdata[key] = data
@@ -44,7 +48,7 @@ def _setdarkdata(exposuretime, detectortemperature, data):
 
 def _getdarkdata(exposuretime, detectortemperature):
     exposuretime = round(exposuretime)
-    detectortemperature = round(detectortemperature)
+    detectortemperature = _mapdetectortemperature(detectortemperature)
     key = "%d@%+d" % (exposuretime, detectortemperature)
     if key not in _darkdata:
         raise RuntimeError("no dark is available.")
@@ -334,8 +338,7 @@ def makedark(
             if verbose:
                 logger(
                     name,
-                    "rejecting %s: taken in evening nautical twilight."
-                    % fitsbasename,
+                    "rejecting %s: taken in evening nautical twilight." % fitsbasename,
                 )
             continue
         try:
@@ -428,12 +431,12 @@ def makeflat(
         fitsbasename = os.path.basename(fitspath)
         try:
             header, data = bake(
-            fitspath,
-            name="makeflat",
-            dooffset=True,
-            dotrim=True,
-            dodark=True,
-        )
+                fitspath,
+                name="makeflat",
+                dooffset=True,
+                dotrim=True,
+                dodark=True,
+            )
         except RuntimeError as e:
             if verbose:
                 logger(name, "rejecting %s: %s" % (fitsbasename, e))
@@ -453,7 +456,9 @@ def makeflat(
             logger(name, "median in center is %.2f DN." % median)
         if median > horno.instrument.flatmax(header):
             if verbose:
-                logger(name, "rejecting %s: median in center is too high." % fitsbasename)
+                logger(
+                    name, "rejecting %s: median in center is too high." % fitsbasename
+                )
             continue
 
         centeryslice = slice(
@@ -485,7 +490,10 @@ def makeflat(
             )
         if p > pmax:
             if verbose:
-                logger(name, "rejecting %s: apparent polarization is too high." % fitsbasename)
+                logger(
+                    name,
+                    "rejecting %s: apparent polarization is too high." % fitsbasename,
+                )
             continue
 
         if verbose:
